@@ -14,7 +14,7 @@ import sequelize from './db.js';
 const port = process.env.PORT || 8000;
 
 const corsOptions = {
-    origin: 'http://localhost:4200',   
+    origin: ['http://localhost:4200','http://85.31.236.137'],   
     methods: ['GET', 'POST', 'PUT', 'DELETE'],  
     allowedHeaders: ['Content-Type', 'Authorization'],  
   };
