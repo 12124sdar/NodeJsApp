@@ -1,0 +1,11 @@
+{
+    "development": {
+      "username": "postgres",
+      "password": "123qwe",
+      "database": "samar",
+      "host": "localhost",
+      "dialect": "postgres",
+      "port": "5432"
+    }
+  }
+  

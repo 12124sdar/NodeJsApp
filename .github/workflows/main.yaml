@@ -1,0 +1,30 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - main  # Adjust this to your main branch name
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Checkout the code
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      # Set up Node.js (or other language environments based on your project)
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'  # Adjust based on your project's Node.js version
+
+      # Send HTTP request to the server for deployment
+      - name: Trigger Deployment API
+        run: |
+          curl -X POST http://your-server.com/deploy \
+            -H "Content-Type: application/json" \
+            -d '{"secret": "${{ secrets.TOKEN_BACKEND }}"}'
+        env:
+          DEPLOY_SECRET: ${{ secrets.TOKEN_BACKEND }}
