@@ -161,17 +161,12 @@ export const createUser = async (req, res) => {
   
       // Compare the provided password with the hashed password in the database
       const isMatch = await bcrypt.compare(password, user.password);
-  
-
-console.log("User Input Password:", password);
-console.log("Hashed Password from DB:", user.password);
-console.log("Passwords Match:", isMatch);
-
-
+      console.log("User Input Password:", password);
+      console.log("Hashed Password from DB:", user.password);
+      console.log("Passwords Match:", isMatch);
       if (!isMatch) {
         return res.status(400).json({ message: 'Invalid credentials' });
       }
-  
       // Create a JWT token
       const payload = {
         id: user.id,

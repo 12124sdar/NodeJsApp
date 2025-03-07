@@ -1,8 +1,8 @@
 {
     "development": {
       "username": "postgres",
-      "password": "123qwe",
-      "database": "samar",
+      "password": "samar",
+      "database": "TASK_MANAGEMENT",
       "host": "localhost",
       "dialect": "postgres",
       "port": "5432"

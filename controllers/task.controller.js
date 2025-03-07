@@ -102,39 +102,98 @@ if (rememberassignTo===true) {
 //   };
 
 
-
 export const getAllTasks = async (req, res) => {
-    try {
-      const tasks = await Task.findAll({
-        where: {
-          is_archive: false,
-        },
-        include: [
-          {
-            model: User,
-            as: 'User',
-            attributes: ['username'],
-          },
-        ],
-       
-        attributes: {
-          include: [
+  try {
+    const tasks = await Task.findAll({
+      where: {
+        is_archive: false,
+      },
+      include: [
+        {
+          model: User,
+          as: 'User',
+          attributes: [
             [
               Sequelize.literal(
-                `DATE_PART('day', CURRENT_DATE::date - DATE_TRUNC('day', "Task"."create_date"::date))`
-            ),
-              'days_since_creation', 
+                `COALESCE("User"."username", 'N/A')`
+              ),
+              'username', // This will either be the username or 'N/A' if the user is null
+            ],
+            [
+              Sequelize.literal(
+                `COALESCE("User"."id", 0)` // If User.id is null, return 0
+              ),
+              'id', // This will either be the User's id or 0 if the id is null
             ],
           ],
-        }, order: [['id', 'ASC']], 
-      });
+        },
+      ],
+      attributes: {
+        include: [
+          [
+            Sequelize.literal(
+              `DATE_PART('day', CURRENT_DATE::date - DATE_TRUNC('day', "Task"."create_date"::date))`
+            ),
+            'days_since_creation',
+          ],
+        ],
+      },
+      order: [['id', 'ASC']],
+    });
+
+    res.status(200).json(tasks);
+  } catch (error) {
+    console.error('Error fetching tasks:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+// export const getAllTasks = async (req, res) => {
+//     try {
+//       const tasks = await Task.findAll({
+//         where: {
+//           is_archive: false,
+//         },
+//         // include: [
+//         //   {
+//         //     model: User,
+//         //     as: 'User',
+//         //     attributes: ['username'],
+//         //   },
+//         // ],
+//         include: [
+//           {
+//             model: User,
+//             as: 'User',
+//             attributes: [
+//               [
+//                 Sequelize.literal(
+//                   `COALESCE("User"."username", 'N/A')`
+//                 ),
+//                 'username', // This will either be the username or 'N/A' if the user is null
+//               ],
+//             ],
+//           },
+//         ],
+       
+//         attributes: {
+//           include: [
+//             [
+//               Sequelize.literal(
+//                 `DATE_PART('day', CURRENT_DATE::date - DATE_TRUNC('day', "Task"."create_date"::date))`
+//             ),
+//               'days_since_creation', 
+//             ],
+//           ],
+//         }, order: [['id', 'ASC']], 
+//       });
   
-      res.status(200).json(tasks);
-    } catch (error) {
-      console.error('Error fetching tasks:', error);
-      res.status(500).json({ message: 'Internal Server Error' });
-    }
-  };
+//       res.status(200).json(tasks);
+//     } catch (error) {
+//       console.error('Error fetching tasks:', error);
+//       res.status(500).json({ message: 'Internal Server Error' });
+//     }
+//   };
   // Get a single Task by ID
   export const getTaskById = async (req, res) => {
     try {
