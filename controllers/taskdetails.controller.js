@@ -142,12 +142,27 @@ export const createTaskDetails = async (req, res) => {
         });
 
         // Fetch User details only if task exists
+        // let user = [];
+        // if (task) {
+        //     user = await User.findAll({
+        //         where: { id: task.assigned_to },
+        //     });
+        // }
         let user = [];
-        if (task) {
-            user = await User.findAll({
-                where: { id: task.assigned_to },
-            });
+if (task) {
+    user = await User.findAll({
+        where: { id: task.assigned_to },
+    });
+
+    // Check if username is null and replace it with 'N/A'
+    user = user.map(u => {
+        if (!u.username) {
+            u.username = 'N/A';
         }
+        return u;
+    });
+}
+
 
         // If neither Task nor TaskDetails exist, return 404
         if (!task && taskDetails.length === 0) {
