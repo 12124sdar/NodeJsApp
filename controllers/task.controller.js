@@ -22,17 +22,24 @@ export const createTask = async (req, res) => {
       category, // Ye naya field h
       sub_category,
       created_user,
-      rememberassignTo
+      rememberassignTo,
+      uname
     } = req.body;
 console.log('rs',rememberassignTo)
     let assignedUserId = assigned_to; // Default value assigned_to rakho
 
+    
 if (rememberassignTo===true) {
     const maxUserId = await User.max('id') || 0; // Max ID uthao, agar null ho to 0 rakho
     console.log("Max User ID:", maxUserId);
 
-    assignedUserId = maxUserId; // assignedUserId ko update karo
+    assignedUserId = maxUserId;
+  }
+  if (assignedUserId === null || assignedUserId === '' || isNaN(assignedUserId)) {
+    assignedUserId = null; // Agar assignedUserId null hai, toh 0 set kar do
 }
+
+console.log("Assigned User ID:", assignedUserId);
 
 
     // Task create karo
@@ -48,7 +55,8 @@ if (rememberassignTo===true) {
       comments,
       is_archive,
       create_date,
-      created_user
+      created_user,
+      uname
     });
 
     let newCategory = null;
@@ -256,50 +264,106 @@ export const getAllTasks = async (req, res) => {
   };
 
 
-  export const updateTaskForEdit = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { 
-            main_title, 
-            sub_title, 
-            description, 
-            assigned_to,  // Ye ab username hoga
-            duration, 
-            comments, 
-            create_date
-        } = req.body;
+//   export const updateTaskForEdit = async (req, res) => {
+//     try {
+//         const { id } = req.params;
+//         const { 
+//             main_title, 
+//             sub_title, 
+//             description, 
+//             assigned_to,  // Ye ab username hoga
+//             duration, 
+//             comments, 
+//             create_date
+//         } = req.body;
 
-        // Pehle user ID fetch karo jiska name 'assigned_to' diya gaya hai
-        const user = await User.findOne({ where: { username: assigned_to } });
+//         // Pehle user ID fetch karo jiska name 'assigned_to' diya gaya hai
+//         const user = await User.findOne({ where: { username: assigned_to } });
 
-        if (!user) {
-            return res.status(400).json({ message: "User not found" });
-        }
+//         if (!user) {
+//             return res.status(400).json({ message: "User not found" });
+//         }
 
-        const task = await Task.findByPk(id);
+//         const task = await Task.findByPk(id);
 
-        if (!task) {
-            return res.status(404).json({ message: "Task not found" });
-        }
+//         if (!task) {
+//             return res.status(404).json({ message: "Task not found" });
+//         }
 
-        // Update task fields
-        task.main_title = main_title || task.main_title;
-        task.sub_title = sub_title || task.sub_title;
-        task.description = description || task.description;
-        task.assigned_to = user.id;  // Yahan user ki ID assign ho rahi hai
-        task.duration = duration || task.duration;
-        task.comments = comments || task.comments;
-        task.create_date = create_date || task.create_date;
+//         // Update task fields
+//         task.main_title = main_title || task.main_title;
+//         task.sub_title = sub_title || task.sub_title;
+//         task.description = description || task.description;
+//         task.assigned_to = user.id;  // Yahan user ki ID assign ho rahi hai
+//         task.duration = duration || task.duration;
+//         task.comments = comments || task.comments;
+//         task.create_date = create_date || task.create_date;
 
-        await task.save();
+//         await task.save();
 
-        res.status(200).json({ message: "Task updated successfully", task });
-    } catch (error) {
-        console.error("Error updating task:", error);
-        res.status(500).json({ message: "Internal Server Error" });
-    }
+//         res.status(200).json({ message: "Task updated successfully", task });
+//     } catch (error) {
+//         console.error("Error updating task:", error);
+//         res.status(500).json({ message: "Internal Server Error" });
+//     }
+// };
+
+export const updateTaskForEdit = async (req, res) => {
+  try {
+      const { id } = req.params;
+      const { 
+          main_title, 
+          sub_title, 
+          description, 
+          assigned_to,  // Ye ab username hoga
+          duration, 
+          comments, 
+          create_date,
+          uname
+      } = req.body;
+
+      // Pehle user ID fetch karo jiska name 'assigned_to' diya gaya hai (Optional check)
+      let user = null;
+      if (assigned_to) {
+          user = await User.findOne({ where: { username: assigned_to } });
+
+          if (!user) {
+              // If user doesn't exist, you can decide what action to take (e.g., notify the user)
+              console.warn(`User with username '${assigned_to}' not found.`);
+              // You can either skip updating the `assigned_to` field or use null/undefined as a fallback.
+          }
+      }
+
+      const task = await Task.findByPk(id);
+
+      if (!task) {
+          return res.status(404).json({ message: "Task not found" });
+      }
+
+      // Update task fields
+      task.main_title = main_title || task.main_title;
+      task.sub_title = sub_title || task.sub_title;
+      task.description = description || task.description;
+      task.uname = uname || task.uname;
+      
+      // Only update assigned_to if user exists, otherwise leave it unchanged
+      if (user) {
+          task.assigned_to = user.id;  // Yahan user ki ID assign ho rahi hai
+      }
+    
+      
+      task.duration = duration || task.duration;
+      task.comments = comments || task.comments;
+      task.create_date = create_date || task.create_date;
+console.log('tasllll',task)
+      await task.save();
+
+      res.status(200).json({ message: "Task updated successfully", task });
+  } catch (error) {
+      console.error("Error updating task:", error);
+      res.status(500).json({ message: "Internal Server Error" });
+  }
 };
-
 
   export const updateTaskDetailsDescription = async (req, res) => {
     try {

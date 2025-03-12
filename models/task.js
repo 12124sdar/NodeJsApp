@@ -22,6 +22,7 @@ const Task = sequelize.define('Task', {
   },
   assigned_to: {
     type: DataTypes.INTEGER,
+    allowNull:true
   },
   duration: {
     type: DataTypes.INTEGER,
@@ -48,6 +49,9 @@ create_date: {
   },
   created_user: {
     type: DataTypes.STRING,
+  },
+  uname: {
+    type: DataTypes.TEXT,
   },
   
 }, {

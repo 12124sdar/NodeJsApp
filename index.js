@@ -42,11 +42,31 @@ app.use((err, req, res, next) => {
 });
 setupAssociations();
  
-sequelize.sync({ alter: true })  
-    .then(() => console.log('Database synced successfully'))
-    .catch(err => console.error('Unable to sync the database:', err));
+// sequelize.sync({ alter: true })  
+//     .then(() => console.log('Database synced successfully'))
+//     .catch(err => console.error('Unable to sync the database:', err));
 
-// Start the server
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
-});
+// // Start the server
+// app.listen(port, () => {
+//     console.log(`Server is running on http://localhost:${port}`);
+// });
+sequelize.sync({ alter: true })
+  .then(async () => {
+    console.log('Database synced successfully');
+
+    // Drop the foreign key constraint if it exists
+    try {
+     await sequelize.query('ALTER TABLE "tasks" DROP CONSTRAINT IF EXISTS "tasks_assigned_to_fkey";');
+      console.log("Foreign key constraint dropped successfully.");
+    } catch (error) {
+      console.error("Error dropping foreign key constraint:", error);
+    }
+
+    // Start the server after successful sync and foreign key removal
+    app.listen(port, () => {
+        console.log(`Server is running on http://localhost:${port}`);
+    });
+  })
+  .catch(err => {
+    console.error('Unable to sync the database:', err);
+  });
